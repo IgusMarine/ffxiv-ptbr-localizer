@@ -1,0 +1,65 @@
+name: publish-bin
+
+# Compila o ffxiv_translations.bin a partir do Supabase e publica no Cloudflare R2.
+# Os plugins instalados baixam a versão nova automaticamente (comparam o sha256 do version.json).
+#
+# Dispara: 1x/dia (cron) + botão manual (Actions → publish-bin → Run workflow).
+# SEGREDOS necessários (Settings → Secrets and variables → Actions):
+#   SUPABASE_URL, SUPABASE_SERVICE_KEY, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY
+
+on:
+  schedule:
+    - cron: "17 6 * * *"   # ~03:17 BRT (minuto fora do :00 de propósito)
+  workflow_dispatch: {}
+
+# Evita duas publicações simultâneas.
+concurrency:
+  group: publish-bin
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      R2_BUCKET: ffxiv-ptbr
+      R2_ENDPOINT: https://7418a2b43e58bd8ce3095b63358d41df.r2.cloudflarestorage.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar deps
+        run: pip install -r scripts/requirements.txt
+
+      - name: Compilar .bin do Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          BIN_OUT: ffxiv_translations.bin
+        run: python scripts/compile_from_supabase.py
+
+      - name: Gerar version.json
+        env:
+          BIN_PATH: ffxiv_translations.bin
+        run: python scripts/make_version_json.py
+
+      - name: Publicar no R2 (S3 API)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 cp ffxiv_translations.bin "s3://${R2_BUCKET}/ffxiv_translations.bin" \
+            --endpoint-url "$R2_ENDPOINT"
+          aws s3 cp version.json "s3://${R2_BUCKET}/version.json" \
+            --endpoint-url "$R2_ENDPOINT" \
+            --content-type application/json --cache-control no-store
+
+      - name: Resumo
+        run: |
+          echo "Publicado no R2:" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat version.json >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
