@@ -51,10 +51,11 @@ def write_str(f, b):
 def main():
     print("Lendo strings do Supabase ...")
     rows = fetch("strings", "english_text,ptbr_text",
-                 "&ptbr_text=not.is.null&status=in.(machine,approved,in_review)")
+                 "&ptbr_text=not.is.null&status=in.(machine,approved,in_review)&order=id.asc")
     print(f"  {len(rows):,} strings traduzidas")
     print("Lendo variantes (string_variants) ...")
-    variants = fetch("string_variants", "english_render,ptbr_render")
+    variants = fetch("string_variants", "english_render,ptbr_render",
+                     "&order=string_key.asc,english_render.asc")
     print(f"  {len(variants):,} variantes")
 
     tr = {}
