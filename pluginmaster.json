@@ -1,6 +1,6 @@
 [
   {
-    "Author": "Danila & comunidade PT-BR",
+    "Author": "Eorzea PT-BR",
     "Name": "FFXIV PT-BR Localizer",
     "InternalName": "FFXIVPTBRLocalizer",
     "Punchline": "Final Fantasy XIV em portugues brasileiro.",
@@ -9,6 +9,7 @@
     "DalamudApiLevel": 15,
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/IgusMarine/ffxiv-ptbr-localizer",
+    "IconUrl": "https://raw.githubusercontent.com/IgusMarine/ffxiv-ptbr-localizer/main/images/icon.png",
     "Tags": [
       "translation",
       "pt-br",
