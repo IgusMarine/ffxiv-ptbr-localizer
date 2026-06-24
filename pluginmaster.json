@@ -5,7 +5,7 @@
     "InternalName": "FFXIVPTBRLocalizer",
     "Punchline": "Final Fantasy XIV em portugues brasileiro.",
     "Description": "Traduz a interface e os textos de Final Fantasy XIV para portugues brasileiro (PT-BR). Projeto de fa, nao-oficial e nao afiliado a Square Enix.",
-    "AssemblyVersion": "1.0.0.4",
+    "AssemblyVersion": "1.0.0.5",
     "DalamudApiLevel": 15,
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/IgusMarine/ffxiv-ptbr-localizer",
@@ -20,10 +20,10 @@
     "CategoryTags": [
       "utility"
     ],
-    "DownloadLinkInstall": "https://github.com/IgusMarine/ffxiv-ptbr-localizer/releases/download/1.0.0.4/latest.zip",
-    "DownloadLinkUpdate": "https://github.com/IgusMarine/ffxiv-ptbr-localizer/releases/download/1.0.0.4/latest.zip",
-    "DownloadLinkTesting": "https://github.com/IgusMarine/ffxiv-ptbr-localizer/releases/download/1.0.0.4/latest.zip",
-    "LastUpdate": 1782263000,
+    "DownloadLinkInstall": "https://github.com/IgusMarine/ffxiv-ptbr-localizer/releases/download/1.0.0.5/latest.zip",
+    "DownloadLinkUpdate": "https://github.com/IgusMarine/ffxiv-ptbr-localizer/releases/download/1.0.0.5/latest.zip",
+    "DownloadLinkTesting": "https://github.com/IgusMarine/ffxiv-ptbr-localizer/releases/download/1.0.0.5/latest.zip",
+    "LastUpdate": 1782264000,
     "IsHide": false,
     "IsTestingExclusive": false,
     "DownloadCount": 0
