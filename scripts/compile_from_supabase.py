@@ -41,6 +41,28 @@ def clean(s):
     return re.sub(r"\s+", " ", s or "").strip()
 
 
+# ── QA GATE ───────────────────────────────────────────────────────────────────
+# Exclui do .bin o que NÃO deve ser carregado/casado no jogo:
+#  - PT corrompido (U+FFFD ou byte de controle): renderiza lixo / risco de crash.
+#  - PT com parâmetro não resolvido ({0}, <Sheet(...)>, <If(...)>): mostraria literal.
+#  - EN com parâmetro não resolvido (UNKNOWN, {0}, <Tag(...)>): nunca casa o texto
+#    real do jogo (que tem o valor preenchido) -> linha inerte, só infla o .bin.
+# Mantém <sigh> e afins (tags sem parêntese), que podem ser literais legítimos.
+_CTRL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f]")
+_CURLY = re.compile(r"\{\d+\}")
+_PARAMTAG = re.compile(r"<\w+\(")
+
+
+def gate_reason(e, p):
+    if "�" in p or _CTRL.search(p):
+        return "pt_corrupt"
+    if _CURLY.search(p) or _PARAMTAG.search(p):
+        return "pt_param"
+    if "UNKNOWN" in e or _CURLY.search(e) or _PARAMTAG.search(e):
+        return "en_inert"
+    return None
+
+
 def write_str(f, b):
     n = len(b)
     while n >= 0x80:
@@ -59,16 +81,25 @@ def main():
     print(f"  {len(variants):,} variantes")
 
     tr = {}
+    gated = {}
+
+    def consider(e, p):
+        if not (e and p):
+            return
+        why = gate_reason(e, p)
+        if why:
+            gated[why] = gated.get(why, 0) + 1
+            return
+        tr[e] = p
+
     for r in rows:
-        e = clean(r.get("english_text"))
-        p = (r.get("ptbr_text") or "").strip().replace("\r\n", "\n")
-        if e and p:
-            tr[e] = p
+        consider(clean(r.get("english_text")), (r.get("ptbr_text") or "").strip().replace("\r\n", "\n"))
     for v in variants:
-        e = clean(v.get("english_render"))
-        p = (v.get("ptbr_render") or "").strip().replace("\r\n", "\n")
-        if e and p:
-            tr[e] = p
+        consider(clean(v.get("english_render")), (v.get("ptbr_render") or "").strip().replace("\r\n", "\n"))
+
+    if gated:
+        print("QA gate — excluídas:", ", ".join(f"{k}={v}" for k, v in sorted(gated.items())),
+              f"(total {sum(gated.values()):,})")
 
     print(f"Escrevendo {len(tr):,} traduções únicas em {OUT} ...")
     with open(OUT, "wb") as f:
